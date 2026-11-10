@@ -1,0 +1,882 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hari Suci Berdasarkan Pawukon</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap');
+        
+        body { font-family: 'Inter', sans-serif; background-color: #f3f4f6; }
+        
+        /* Custom Theme Colors */
+        .bg-prada { background: linear-gradient(135deg, #F59E0B, #D97706); }
+        .text-prada { color: #D97706; }
+        .bg-tridatu { background: linear-gradient(90deg, #DC2626 33.3%, #ffffff 33.3%, #ffffff 66.6%, #000000 66.6%); }
+        
+        /* Animations */
+        .slide { display: none; opacity: 0; transform: translateY(20px); transition: all 0.5s ease-in-out; }
+        .slide.active { display: flex; opacity: 1; transform: translateY(0); }
+        .fade-in { animation: fadeIn 0.5s ease-in-out forwards; }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: scale(0.95); }
+            to { opacity: 1; transform: scale(1); }
+        }
+
+        /* Game specific styles */
+        .drop-zone { min-height: 40px; border: 2px dashed #cbd5e1; border-radius: 0.5rem; display: flex; align-items: center; justify-content: center; padding: 0.25rem; transition: background 0.2s; cursor: pointer; }
+        .drop-zone.active-zone { background-color: #fef3c7; border-color: #F59E0B; }
+        .draggable-item { cursor: pointer; transition: transform 0.1s, box-shadow 0.1s; user-select: none; }
+        .draggable-item:active { transform: scale(0.95); }
+        .draggable-item.selected { box-shadow: 0 0 0 3px #F59E0B; border-color: #F59E0B; background-color: #fffbeb; }
+
+        /* Scrollbar */
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: #f1f1f1; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+        
+        /* Modal */
+        #toastModal { display: none; z-index: 1000; }
+        #toastModal.show { display: flex; animation: fadeIn 0.3s ease; }
+    </style>
+</head>
+<body class="h-screen w-full flex items-center justify-center p-0 sm:p-4 text-gray-800">
+
+    <!-- Toast Modal -->
+    <div id="toastModal" class="fixed inset-0 bg-black/50 items-center justify-center">
+        <div class="bg-white p-6 rounded-2xl shadow-2xl max-w-sm w-full text-center transform transition-all">
+            <div id="toastIcon" class="text-5xl mb-4"></div>
+            <h3 id="toastTitle" class="text-2xl font-bold mb-2"></h3>
+            <p id="toastMessage" class="text-gray-600 mb-6"></p>
+            <button onclick="closeToast()" class="bg-prada text-white px-6 py-2 rounded-full font-bold hover:shadow-lg transition">Tutup</button>
+        </div>
+    </div>
+
+    <!-- App Container -->
+    <div id="appContainer" class="w-full max-w-4xl h-full sm:h-[90vh] bg-[#FFFBF0] sm:rounded-2xl shadow-2xl flex flex-col relative overflow-hidden border-t-8 border-yellow-500">
+        
+        <!-- Header -->
+        <header id="topHeader" class="hidden flex justify-between items-center px-4 py-3 bg-white/80 backdrop-blur-sm border-b z-50">
+            <button onclick="goToSlide(1)" class="flex items-center gap-2 text-yellow-600 hover:text-yellow-700 font-bold transition">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"></path></svg>
+                Menu
+            </button>
+            <div class="text-sm font-semibold text-gray-500" id="pageIndicator">Hal: 1</div>
+            <button onclick="toggleFullscreen()" class="p-2 bg-gray-100 rounded-full hover:bg-gray-200 transition" title="Maximize">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 0l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5l-5-5m5 5v-4m0 4h-4"></path></svg>
+            </button>
+        </header>
+
+        <!-- Slides Container -->
+        <main class="flex-1 relative overflow-y-auto overflow-x-hidden p-6 sm:p-10 scroll-smooth">
+            
+            <!-- Slide 0: Cover -->
+            <div id="slide0" class="slide active flex-col items-center justify-center text-center h-full">
+                <div class="w-32 h-32 mb-6 text-yellow-500">
+                    <!-- Hindu Temple / Gate SVG -->
+                    <svg viewBox="0 0 24 24" fill="currentColor" class="w-full h-full drop-shadow-md">
+                        <path d="M12 2L2 12h3v8h14v-8h3L12 2zm0 2.8L17.2 10H6.8L12 4.8zM7 18v-6h10v6H7z"/>
+                        <rect x="10" y="14" width="4" height="4" rx="1"/>
+                    </svg>
+                </div>
+                <h2 class="text-yellow-600 font-bold tracking-widest text-sm mb-2 uppercase">Agama Hindu - SD Kelas 3</h2>
+                <h1 class="text-4xl sm:text-5xl font-extrabold text-gray-800 mb-4 leading-tight">Hari Suci <br> <span class="text-transparent bg-clip-text bg-prada">Berdasarkan Pawukon</span></h1>
+                <p class="text-gray-500 mb-8 font-medium">Oleh: I Made Edy Bangkit Saputra</p>
+                <button onclick="nextSlide()" class="bg-prada text-white px-8 py-3 rounded-full font-bold text-lg shadow-lg hover:shadow-xl hover:scale-105 transition-all">Mulai Belajar</button>
+            </div>
+
+            <!-- Slide 1: Menu -->
+            <div id="slide1" class="slide flex-col h-full">
+                <h2 class="text-3xl font-bold text-center mb-8 text-gray-800">Menu Utama</h2>
+                <div class="grid grid-cols-2 sm:grid-cols-4 gap-4 flex-1 content-center">
+                    <button onclick="goToSlide(2)" class="flex flex-col items-center p-4 bg-white rounded-2xl shadow hover:shadow-md hover:-translate-y-1 transition text-blue-600"><div class="text-3xl mb-2">🎯</div><span class="font-bold">Tujuan</span></button>
+                    <button onclick="goToSlide(3)" class="flex flex-col items-center p-4 bg-white rounded-2xl shadow hover:shadow-md hover:-translate-y-1 transition text-green-600"><div class="text-3xl mb-2">🗺️</div><span class="font-bold">Konsep</span></button>
+                    <button onclick="goToSlide(4)" class="flex flex-col items-center p-4 bg-white rounded-2xl shadow hover:shadow-md hover:-translate-y-1 transition text-purple-600"><div class="text-3xl mb-2">📖</div><span class="font-bold">Materi</span></button>
+                    <button onclick="goToSlide(9)" class="flex flex-col items-center p-4 bg-white rounded-2xl shadow hover:shadow-md hover:-translate-y-1 transition text-red-600"><div class="text-3xl mb-2">🎬</div><span class="font-bold">Video</span></button>
+                    <button onclick="goToSlide(10)" class="flex flex-col items-center p-4 bg-white rounded-2xl shadow hover:shadow-md hover:-translate-y-1 transition text-yellow-500"><div class="text-3xl mb-2">⚙️</div><span class="font-bold">Simulasi</span></button>
+                    <button onclick="goToSlide(11)" class="flex flex-col items-center p-4 bg-white rounded-2xl shadow hover:shadow-md hover:-translate-y-1 transition text-pink-500"><div class="text-3xl mb-2">🎮</div><span class="font-bold">Game</span></button>
+                    <button onclick="goToSlide(15)" class="flex flex-col items-center p-4 bg-white rounded-2xl shadow hover:shadow-md hover:-translate-y-1 transition text-indigo-500"><div class="text-3xl mb-2">📝</div><span class="font-bold">Kuis</span></button>
+                    <button onclick="goToSlide(16)" class="flex flex-col items-center p-4 bg-white rounded-2xl shadow hover:shadow-md hover:-translate-y-1 transition text-teal-600"><div class="text-3xl mb-2">📚</div><span class="font-bold">Rangkuman</span></button>
+                </div>
+            </div>
+
+            <!-- Slide 2: Tujuan Pembelajaran -->
+            <div id="slide2" class="slide flex-col">
+                <div class="flex items-center gap-3 mb-6">
+                    <div class="p-3 bg-blue-100 rounded-xl text-blue-600 text-2xl">🎯</div>
+                    <h2 class="text-3xl font-bold text-gray-800">Tujuan Pembelajaran</h2>
+                </div>
+                <div class="bg-white p-6 sm:p-8 rounded-2xl shadow-sm border border-gray-100 flex-1">
+                    <p class="text-gray-600 mb-6 font-medium">Setelah mempelajari materi ini, siswa diharapkan mampu:</p>
+                    <ul class="space-y-4">
+                        <li class="flex items-start gap-4 p-4 bg-blue-50 rounded-xl">
+                            <span class="text-blue-500 font-bold text-xl mt-1">1</span>
+                            <p class="text-gray-700 text-lg">Memahami pengertian Pawukon dan siklus perhitungannya dalam kalender Bali dengan benar.</p>
+                        </li>
+                        <li class="flex items-start gap-4 p-4 bg-green-50 rounded-xl">
+                            <span class="text-green-500 font-bold text-xl mt-1">2</span>
+                            <p class="text-gray-700 text-lg">Menyebutkan hari-hari suci agama Hindu yang perhitungannya berdasarkan Pawukon.</p>
+                        </li>
+                        <li class="flex items-start gap-4 p-4 bg-yellow-50 rounded-xl">
+                            <span class="text-yellow-500 font-bold text-xl mt-1">3</span>
+                            <p class="text-gray-700 text-lg">Menjelaskan makna perayaan hari suci Saraswati, Pagerwesi, Galungan, dan Kuningan dalam kehidupan sehari-hari.</p>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- Slide 3: Peta Konsep -->
+            <div id="slide3" class="slide flex-col">
+                <div class="flex items-center gap-3 mb-6">
+                    <div class="p-3 bg-green-100 rounded-xl text-green-600 text-2xl">🗺️</div>
+                    <h2 class="text-3xl font-bold text-gray-800">Peta Konsep</h2>
+                </div>
+                <div class="flex-1 flex items-center justify-center bg-white rounded-2xl shadow-sm p-4 border border-gray-100">
+                    <div class="w-full max-w-md mx-auto relative text-center">
+                        <div class="bg-prada text-white font-bold py-3 px-6 rounded-xl shadow-lg inline-block mb-8 relative z-10 text-xl">HARI SUCI PAWUKON</div>
+                        <div class="absolute left-1/2 top-10 bottom-10 w-1 bg-yellow-400 -translate-x-1/2 z-0"></div>
+                        <div class="space-y-6 relative z-10">
+                            <div class="flex justify-between items-center w-full">
+                                <div class="bg-white border-2 border-yellow-400 py-2 px-4 rounded-lg shadow font-semibold text-gray-700 w-5/12 ml-auto">Saraswati (Watugunung)</div>
+                                <div class="w-2/12 border-t-2 border-yellow-400"></div>
+                            </div>
+                            <div class="flex justify-between items-center w-full flex-row-reverse">
+                                <div class="bg-white border-2 border-blue-400 py-2 px-4 rounded-lg shadow font-semibold text-gray-700 w-5/12 mr-auto">Pagerwesi (Sinta)</div>
+                                <div class="w-2/12 border-t-2 border-blue-400"></div>
+                            </div>
+                            <div class="flex justify-between items-center w-full">
+                                <div class="bg-white border-2 border-green-400 py-2 px-4 rounded-lg shadow font-semibold text-gray-700 w-5/12 ml-auto">Galungan (Dungulan)</div>
+                                <div class="w-2/12 border-t-2 border-green-400"></div>
+                            </div>
+                            <div class="flex justify-between items-center w-full flex-row-reverse">
+                                <div class="bg-white border-2 border-purple-400 py-2 px-4 rounded-lg shadow font-semibold text-gray-700 w-5/12 mr-auto">Kuningan (Kuningan)</div>
+                                <div class="w-2/12 border-t-2 border-purple-400"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Slide 4: Materi 1 - Pengertian -->
+            <div id="slide4" class="slide flex-col">
+                <div class="flex items-center gap-3 mb-6">
+                    <div class="p-3 bg-purple-100 rounded-xl text-purple-600 text-2xl">📖</div>
+                    <h2 class="text-3xl font-bold text-gray-800">Apa itu Pawukon?</h2>
+                </div>
+                <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 flex flex-col sm:flex-row gap-6 items-center">
+                    <div class="w-full sm:w-1/3 flex justify-center">
+                        <svg class="w-40 h-40 text-yellow-500" viewBox="0 0 24 24" fill="currentColor">
+                            <path d="M19 4h-1V2h-2v2H8V2H6v2H5c-1.11 0-1.99.9-1.99 2L3 20a2 2 0 002 2h14c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 16H5V10h14v10zm0-12H5V6h14v2z"/>
+                            <path d="M7 12h5v5H7z" fill="#DC2626"/>
+                        </svg>
+                    </div>
+                    <div class="w-full sm:w-2/3">
+                        <p class="text-lg text-gray-700 leading-relaxed mb-4">
+                            Dalam agama Hindu di Bali, kita mengenal kalender Bali yang menggunakan sistem <b>Pawukon</b> atau wuku. 
+                        </p>
+                        <p class="text-lg text-gray-700 leading-relaxed mb-4">
+                            Satu siklus pawukon terdiri dari <b>30 wuku</b>. Setiap wuku umurnya 7 hari (satu minggu). Jadi, satu siklus penuh pawukon adalah 30 x 7 = <b>210 hari</b>.
+                        </p>
+                        <div class="bg-yellow-50 p-4 rounded-xl border border-yellow-200">
+                            <h4 class="font-bold text-yellow-700 mb-1">Contoh Wuku:</h4>
+                            <p class="text-sm text-yellow-800">Sinta, Landep, Ukir, ... Dungulan, Kuningan, ... hingga Watugunung (wuku ke-30).</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Slide 5: Materi 2 - Saraswati -->
+            <div id="slide5" class="slide flex-col">
+                <h2 class="text-3xl font-bold text-gray-800 mb-6">1. Hari Raya Saraswati</h2>
+                <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 flex flex-col sm:flex-row gap-6 items-center">
+                    <div class="w-full sm:w-1/3 flex justify-center">
+                        <svg class="w-32 h-32 text-blue-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"></path>
+                            <path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"></path>
+                        </svg>
+                    </div>
+                    <div class="w-full sm:w-2/3">
+                        <ul class="space-y-3 text-lg text-gray-700">
+                            <li>📅 <b>Jatuh pada:</b> Saniscara Umanis Wuku Watugunung</li>
+                            <li>✨ <b>Makna:</b> Hari turunnya Ilmu Pengetahuan suci. Umat Hindu memuja Dewi Saraswati sebagai dewi ilmu pengetahuan dan seni.</li>
+                            <li>🌱 <b>Dalam Kehidupan:</b> Pada hari ini, buku-buku pelajaran, lontar, dan kitab suci dibersihkan dan diupacarai. Siswa biasanya sembahyang di sekolah memohon kecerdasan.</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Slide 6: Materi 3 - Pagerwesi -->
+            <div id="slide6" class="slide flex-col">
+                <h2 class="text-3xl font-bold text-gray-800 mb-6">2. Hari Raya Pagerwesi</h2>
+                <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 flex flex-col sm:flex-row gap-6 items-center">
+                    <div class="w-full sm:w-1/3 flex justify-center">
+                        <svg class="w-32 h-32 text-indigo-500" viewBox="0 0 24 24" fill="currentColor">
+                            <path d="M12 1L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4zm0 10.99h7c-.53 4.12-3.28 7.79-7 8.94V12H5V6.3l7-3.11v8.8z"/>
+                        </svg>
+                    </div>
+                    <div class="w-full sm:w-2/3">
+                        <ul class="space-y-3 text-lg text-gray-700">
+                            <li>📅 <b>Jatuh pada:</b> Buda Kliwon Wuku Sinta</li>
+                            <li>✨ <b>Makna:</b> Pagerwesi berarti "Pagar Besi". Maknanya adalah membentengi atau memagari diri dengan ilmu pengetahuan agar iman kita kuat dari godaan keburukan.</li>
+                            <li>🌱 <b>Dalam Kehidupan:</b> Kita memuja Sang Hyang Pramesti Guru agar diberikan keteguhan iman dan tuntunan jalan yang benar.</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Slide 7: Materi 4 - Galungan -->
+            <div id="slide7" class="slide flex-col">
+                <h2 class="text-3xl font-bold text-gray-800 mb-6">3. Hari Raya Galungan</h2>
+                <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 flex flex-col sm:flex-row gap-6 items-center">
+                    <div class="w-full sm:w-1/3 flex justify-center">
+                        <!-- Custom Penjor SVG -->
+                        <svg class="w-32 h-32 text-green-600" viewBox="0 0 100 100" fill="none" stroke="currentColor" stroke-width="4">
+                            <path d="M50 90 L50 20 Q50 10 35 15 Q20 20 20 40" stroke-linecap="round"/>
+                            <path d="M50 30 L60 40 M50 40 L60 50 M50 50 L60 60 M50 60 L60 70 M50 70 L60 80" stroke-linecap="round"/>
+                            <circle cx="20" cy="40" r="3" fill="currentColor"/>
+                        </svg>
+                    </div>
+                    <div class="w-full sm:w-2/3">
+                        <ul class="space-y-3 text-lg text-gray-700">
+                            <li>📅 <b>Jatuh pada:</b> Buda Kliwon Wuku Dungulan</li>
+                            <li>✨ <b>Makna:</b> Merayakan kemenangan Dharma (kebaikan) melawan Adharma (keburukan).</li>
+                            <li>🌱 <b>Dalam Kehidupan:</b> Umat Hindu memasang <b>Penjor</b> di depan rumah sebagai lambang rasa syukur atas kemakmuran dari Ida Sang Hyang Widhi Wasa. Sehari sebelumnya disebut hari <i>Penampahan</i>.</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Slide 8: Materi 5 - Kuningan -->
+            <div id="slide8" class="slide flex-col">
+                <h2 class="text-3xl font-bold text-gray-800 mb-6">4. Hari Raya Kuningan</h2>
+                <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 flex flex-col sm:flex-row gap-6 items-center">
+                    <div class="w-full sm:w-1/3 flex justify-center">
+                        <!-- Custom Tumpeng/Kuningan SVG -->
+                        <svg class="w-32 h-32 text-yellow-500" viewBox="0 0 100 100" fill="currentColor">
+                            <path d="M50 20 L20 80 L80 80 Z"/>
+                            <rect x="25" y="80" width="50" height="10" fill="#8B4513"/>
+                        </svg>
+                    </div>
+                    <div class="w-full sm:w-2/3">
+                        <ul class="space-y-3 text-lg text-gray-700">
+                            <li>📅 <b>Jatuh pada:</b> Saniscara Kliwon Wuku Kuningan (10 hari setelah Galungan)</li>
+                            <li>✨ <b>Makna:</b> Diyakini para Dewa dan Bhatara-Bhatari turun ke bumi untuk memberikan berkah keselamatan. Setelah tengah hari, beliau kembali ke kahyangan.</li>
+                            <li>🌱 <b>Dalam Kehidupan:</b> Ciri khasnya adalah sesajen menggunakan nasi kuning (Tumpeng Kuning) sebagai lambang kemakmuran dan ucapan syukur.</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Slide 9: Video -->
+            <div id="slide9" class="slide flex-col h-full">
+                <div class="flex items-center gap-3 mb-6">
+                    <div class="p-3 bg-red-100 rounded-xl text-red-600 text-2xl">🎬</div>
+                    <h2 class="text-3xl font-bold text-gray-800">Video Pembelajaran</h2>
+                </div>
+                <div class="flex-1 bg-black rounded-2xl overflow-hidden shadow-lg border-4 border-gray-800 relative">
+                    <iframe class="absolute top-0 left-0 w-full h-full" src="https://www.youtube.com/embed/V_sArtWjwRM" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+                </div>
+            </div>
+
+            <!-- Slide 10: Simulasi Interaktif -->
+            <div id="slide10" class="slide flex-col">
+                <div class="flex items-center gap-3 mb-4">
+                    <div class="p-3 bg-yellow-100 rounded-xl text-yellow-600 text-2xl">⚙️</div>
+                    <h2 class="text-3xl font-bold text-gray-800">Simulasi Roda Pawukon</h2>
+                </div>
+                <p class="mb-4 text-gray-600">Pilih nama wuku di bawah ini untuk melihat Hari Suci besar apa yang jatuh pada wuku tersebut.</p>
+                <div class="bg-white p-6 rounded-2xl shadow-md border border-gray-200 text-center flex-1 flex flex-col items-center justify-center">
+                    <label class="font-bold text-gray-700 text-lg mb-2">Pilih Wuku:</label>
+                    <select id="wukuSelect" class="w-full max-w-xs p-3 border-2 border-yellow-400 rounded-xl text-lg font-bold text-gray-800 focus:outline-none focus:ring-4 focus:ring-yellow-200 mb-8" onchange="updateSimulasi()">
+                        <option value="" disabled selected>-- Pilih Wuku --</option>
+                        <option value="Sinta">1. Sinta</option>
+                        <option value="Landep">2. Landep</option>
+                        <option value="Ukir">3. Ukir</option>
+                        <option value="Dungulan">11. Dungulan</option>
+                        <option value="Kuningan">12. Kuningan</option>
+                        <option value="Watugunung">30. Watugunung</option>
+                    </select>
+                    
+                    <div id="simulasiResult" class="hidden flex-col items-center fade-in">
+                        <div id="simIcon" class="text-6xl mb-4">✨</div>
+                        <h3 class="text-2xl font-bold text-prada mb-2" id="simTitle">Hari Raya</h3>
+                        <p class="text-gray-600 text-lg bg-yellow-50 p-4 rounded-xl" id="simDesc">Deskripsi</p>
+                    </div>
+                    <div id="simEmpty" class="text-gray-400 italic">Hasil akan muncul di sini...</div>
+                </div>
+            </div>
+
+            <!-- Slide 11: Game 1 - Pasangkan (Drag & Drop replacement logic for mobile touch safety) -->
+            <div id="slide11" class="slide flex-col">
+                <div class="flex items-center justify-between mb-4">
+                    <h2 class="text-2xl font-bold text-gray-800">Game 1: Pasangkan Makna</h2>
+                    <span class="bg-pink-100 text-pink-600 px-3 py-1 rounded-full text-sm font-bold">5 Soal</span>
+                </div>
+                <p class="text-sm text-gray-600 mb-4 bg-blue-50 p-3 rounded-lg border border-blue-100">💡 <b>Cara Main:</b> Klik kotak nama hari suci (warna kuning), lalu klik kotak kosong (garis putus-putus) di sebelahnya untuk memasangkan.</p>
+                
+                <div class="flex flex-col sm:flex-row gap-6">
+                    <!-- Source items -->
+                    <div class="w-full sm:w-1/3 flex flex-row sm:flex-col flex-wrap gap-3" id="matchSources">
+                        <div class="draggable-item bg-yellow-100 border-2 border-yellow-400 p-3 rounded-lg font-bold text-center" onclick="selectMatchItem(this)" data-id="G">Galungan</div>
+                        <div class="draggable-item bg-yellow-100 border-2 border-yellow-400 p-3 rounded-lg font-bold text-center" onclick="selectMatchItem(this)" data-id="K">Kuningan</div>
+                        <div class="draggable-item bg-yellow-100 border-2 border-yellow-400 p-3 rounded-lg font-bold text-center" onclick="selectMatchItem(this)" data-id="S">Saraswati</div>
+                        <div class="draggable-item bg-yellow-100 border-2 border-yellow-400 p-3 rounded-lg font-bold text-center" onclick="selectMatchItem(this)" data-id="P">Pagerwesi</div>
+                        <div class="draggable-item bg-yellow-100 border-2 border-yellow-400 p-3 rounded-lg font-bold text-center" onclick="selectMatchItem(this)" data-id="L">Tumpek Landep</div>
+                    </div>
+                    
+                    <!-- Targets -->
+                    <div class="w-full sm:w-2/3 space-y-3" id="matchTargets">
+                        <div class="flex items-center gap-3 p-3 bg-white rounded-lg shadow-sm border">
+                            <p class="flex-1 text-sm font-medium">Turunnya Ilmu Pengetahuan</p>
+                            <div class="drop-zone w-32" onclick="dropMatchItem(this)" data-answer="S"></div>
+                        </div>
+                        <div class="flex items-center gap-3 p-3 bg-white rounded-lg shadow-sm border">
+                            <p class="flex-1 text-sm font-medium">Kemenangan Dharma (Kebaikan)</p>
+                            <div class="drop-zone w-32" onclick="dropMatchItem(this)" data-answer="G"></div>
+                        </div>
+                        <div class="flex items-center gap-3 p-3 bg-white rounded-lg shadow-sm border">
+                            <p class="flex-1 text-sm font-medium">Turunnya Dewa & Leluhur (Nasi Kuning)</p>
+                            <div class="drop-zone w-32" onclick="dropMatchItem(this)" data-answer="K"></div>
+                        </div>
+                        <div class="flex items-center gap-3 p-3 bg-white rounded-lg shadow-sm border">
+                            <p class="flex-1 text-sm font-medium">Keteguhan/Memagari Iman</p>
+                            <div class="drop-zone w-32" onclick="dropMatchItem(this)" data-answer="P"></div>
+                        </div>
+                        <div class="flex items-center gap-3 p-3 bg-white rounded-lg shadow-sm border">
+                            <p class="flex-1 text-sm font-medium">Ketajaman Pikiran/Senjata</p>
+                            <div class="drop-zone w-32" onclick="dropMatchItem(this)" data-answer="L"></div>
+                        </div>
+                    </div>
+                </div>
+                <button onclick="checkGame1()" class="mt-6 bg-green-500 text-white w-full py-3 rounded-xl font-bold shadow hover:bg-green-600 transition">Cek Jawaban</button>
+            </div>
+
+            <!-- Slide 12: Game 2 - Drag Words -->
+            <div id="slide12" class="slide flex-col">
+                <div class="flex items-center justify-between mb-4">
+                    <h2 class="text-2xl font-bold text-gray-800">Game 2: Lengkapi Paragraf</h2>
+                    <span class="bg-blue-100 text-blue-600 px-3 py-1 rounded-full text-sm font-bold">5 Kata</span>
+                </div>
+                <p class="text-sm text-gray-600 mb-4">Pilih kata di bawah, lalu klik kotak kosong pada kalimat yang tepat.</p>
+                
+                <div class="flex flex-wrap gap-2 mb-6 p-4 bg-gray-100 rounded-xl" id="wordSources">
+                    <div class="draggable-item bg-indigo-500 text-white px-4 py-2 rounded-lg font-bold" onclick="selectWordItem(this)" data-word="Penjor">Penjor</div>
+                    <div class="draggable-item bg-indigo-500 text-white px-4 py-2 rounded-lg font-bold" onclick="selectWordItem(this)" data-word="Dungulan">Dungulan</div>
+                    <div class="draggable-item bg-indigo-500 text-white px-4 py-2 rounded-lg font-bold" onclick="selectWordItem(this)" data-word="Wasa">Wasa</div>
+                    <div class="draggable-item bg-indigo-500 text-white px-4 py-2 rounded-lg font-bold" onclick="selectWordItem(this)" data-word="Penampahan">Penampahan</div>
+                    <div class="draggable-item bg-indigo-500 text-white px-4 py-2 rounded-lg font-bold" onclick="selectWordItem(this)" data-word="Galungan">Galungan</div>
+                </div>
+
+                <div class="bg-white p-6 rounded-2xl shadow-sm border text-lg leading-loose text-gray-700">
+                    Hari raya <span class="drop-zone inline-flex min-w-[100px] h-8 align-middle border-indigo-300" onclick="dropWordItem(this)" data-answer="Galungan"></span> 
+                    dirayakan setiap 210 hari sekali pada hari Buda Kliwon Wuku <span class="drop-zone inline-flex min-w-[100px] h-8 align-middle border-indigo-300" onclick="dropWordItem(this)" data-answer="Dungulan"></span>. 
+                    Sehari sebelumnya disebut hari <span class="drop-zone inline-flex min-w-[120px] h-8 align-middle border-indigo-300" onclick="dropWordItem(this)" data-answer="Penampahan"></span> 
+                    dimana umat Hindu membuat <span class="drop-zone inline-flex min-w-[90px] h-8 align-middle border-indigo-300" onclick="dropWordItem(this)" data-answer="Penjor"></span> 
+                    sebagai lambang ucapan syukur kepada Ida Sang Hyang Widhi <span class="drop-zone inline-flex min-w-[80px] h-8 align-middle border-indigo-300" onclick="dropWordItem(this)" data-answer="Wasa"></span>.
+                </div>
+                <button onclick="checkGame2()" class="mt-6 bg-green-500 text-white w-full py-3 rounded-xl font-bold shadow hover:bg-green-600 transition">Cek Jawaban</button>
+            </div>
+
+            <!-- Slide 13: Game 3 - Fill Words (Ketik) -->
+            <div id="slide13" class="slide flex-col">
+                <div class="flex items-center justify-between mb-4">
+                    <h2 class="text-2xl font-bold text-gray-800">Game 3: Isian Singkat</h2>
+                    <span class="bg-orange-100 text-orange-600 px-3 py-1 rounded-full text-sm font-bold">5 Isian</span>
+                </div>
+                <p class="text-sm text-gray-600 mb-4">Ketik jawaban yang tepat pada kolom yang disediakan. (Gunakan huruf kecil/besar tidak masalah)</p>
+                
+                <div class="bg-white p-6 rounded-2xl shadow-sm border text-lg leading-loose text-gray-700">
+                    Hari <input type="text" id="g3_1" class="border-b-2 border-orange-400 outline-none w-28 text-center text-orange-700 font-bold bg-orange-50" placeholder="..."> 
+                    adalah hari turunnya ilmu <input type="text" id="g3_2" class="border-b-2 border-orange-400 outline-none w-32 text-center text-orange-700 font-bold bg-orange-50" placeholder="...">. 
+                    Dirayakan pada hari <input type="text" id="g3_3" class="border-b-2 border-orange-400 outline-none w-28 text-center text-orange-700 font-bold bg-orange-50" placeholder="..."> 
+                    Umanis Wuku <input type="text" id="g3_4" class="border-b-2 border-orange-400 outline-none w-32 text-center text-orange-700 font-bold bg-orange-50" placeholder="...">. 
+                    Pada hari ini, buku-buku dan <input type="text" id="g3_5" class="border-b-2 border-orange-400 outline-none w-24 text-center text-orange-700 font-bold bg-orange-50" placeholder="..."> dibersihkan dan disucikan.
+                </div>
+                <button onclick="checkGame3()" class="mt-6 bg-green-500 text-white w-full py-3 rounded-xl font-bold shadow hover:bg-green-600 transition">Cek Jawaban</button>
+            </div>
+
+            <!-- Slide 14: Game 4 - Tebak Gambar -->
+            <div id="slide14" class="slide flex-col">
+                <div class="flex items-center justify-between mb-4">
+                    <h2 class="text-2xl font-bold text-gray-800">Game 4: Tebak Gambar</h2>
+                    <span id="tgProgress" class="bg-teal-100 text-teal-600 px-3 py-1 rounded-full text-sm font-bold">1 / 5</span>
+                </div>
+                <div class="bg-white p-6 rounded-2xl shadow-sm border flex-1 flex flex-col items-center justify-center relative">
+                    <!-- Area Gambar -->
+                    <div id="tgImageContainer" class="w-48 h-48 mb-8 text-teal-600 flex justify-center items-center bg-teal-50 rounded-2xl">
+                        <!-- SVG disuntik lewat JS -->
+                    </div>
+                    <h3 id="tgQuestionText" class="text-xl font-bold text-center mb-6 text-gray-700">Gambar di atas identik dengan hari raya...</h3>
+                    <!-- Area Tombol -->
+                    <div id="tgOptions" class="grid grid-cols-2 gap-4 w-full max-w-md">
+                        <!-- Buttons injected via JS -->
+                    </div>
+                </div>
+            </div>
+
+            <!-- Slide 15: Kuis Interaktif -->
+            <div id="slide15" class="slide flex-col">
+                <div class="flex items-center justify-between mb-6">
+                    <div class="flex items-center gap-3">
+                        <div class="p-3 bg-red-100 rounded-xl text-red-600 text-2xl">📝</div>
+                        <h2 class="text-3xl font-bold text-gray-800">Kuis Evaluasi</h2>
+                    </div>
+                    <span id="quizProgress" class="text-gray-500 font-bold">Soal 1/10</span>
+                </div>
+                
+                <div id="quizContainer" class="bg-white p-6 rounded-2xl shadow-sm border flex-1 flex flex-col">
+                    <h3 id="qText" class="text-xl font-semibold mb-6 text-gray-800 leading-relaxed">Pertanyaan</h3>
+                    
+                    <!-- Options container -->
+                    <div id="qOptions" class="flex flex-col gap-3">
+                        <!-- Injected -->
+                    </div>
+
+                    <div id="qFeedback" class="hidden mt-6 p-4 rounded-xl font-bold">Feedback</div>
+                    
+                    <button id="qNextBtn" onclick="nextQuiz()" class="hidden mt-auto bg-prada text-white px-6 py-3 rounded-xl font-bold w-full">Lanjut</button>
+                </div>
+                
+                <!-- Hasil Kuis -->
+                <div id="quizResult" class="hidden bg-white p-6 rounded-2xl shadow-sm border flex-1 flex-col items-center justify-center text-center">
+                    <div class="text-6xl mb-4">🏆</div>
+                    <h2 class="text-3xl font-bold text-gray-800 mb-2">Selesai!</h2>
+                    <p class="text-lg text-gray-600 mb-4">Skor kamu:</p>
+                    <div id="finalScore" class="text-5xl font-extrabold text-prada mb-6">100</div>
+                    <p id="motivasiMsg" class="text-xl font-medium text-green-600 mb-8">Luar Biasa! Pemahamanmu sangat bagus.</p>
+                    <button onclick="resetQuiz()" class="bg-gray-200 text-gray-800 px-6 py-2 rounded-full font-bold hover:bg-gray-300">Ulangi Kuis</button>
+                </div>
+            </div>
+
+            <!-- Slide 16: Rangkuman -->
+            <div id="slide16" class="slide flex-col">
+                <div class="flex items-center gap-3 mb-6">
+                    <div class="p-3 bg-green-100 rounded-xl text-green-600 text-2xl">📚</div>
+                    <h2 class="text-3xl font-bold text-gray-800">Rangkuman</h2>
+                </div>
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 flex-1">
+                    <div class="bg-blue-50 border-l-4 border-blue-500 p-4 rounded-r-xl shadow-sm">
+                        <h3 class="font-bold text-blue-800 text-lg mb-1">Pawukon</h3>
+                        <p class="text-gray-700 text-sm">Sistem kalender Bali dengan siklus 210 hari (30 wuku x 7 hari).</p>
+                    </div>
+                    <div class="bg-yellow-50 border-l-4 border-yellow-500 p-4 rounded-r-xl shadow-sm">
+                        <h3 class="font-bold text-yellow-800 text-lg mb-1">Saraswati (Watugunung)</h3>
+                        <p class="text-gray-700 text-sm">Turunnya ilmu pengetahuan suci. Buku-buku disucikan.</p>
+                    </div>
+                    <div class="bg-indigo-50 border-l-4 border-indigo-500 p-4 rounded-r-xl shadow-sm">
+                        <h3 class="font-bold text-indigo-800 text-lg mb-1">Pagerwesi (Sinta)</h3>
+                        <p class="text-gray-700 text-sm">Memagari diri dengan keteguhan iman dan tuntunan hidup.</p>
+                    </div>
+                    <div class="bg-green-50 border-l-4 border-green-500 p-4 rounded-r-xl shadow-sm">
+                        <h3 class="font-bold text-green-800 text-lg mb-1">Galungan (Dungulan)</h3>
+                        <p class="text-gray-700 text-sm">Kemenangan Dharma atas Adharma. Ciri khas memasang Penjor.</p>
+                    </div>
+                    <div class="bg-orange-50 border-l-4 border-orange-500 p-4 rounded-r-xl shadow-sm sm:col-span-2">
+                        <h3 class="font-bold text-orange-800 text-lg mb-1">Kuningan (Kuningan)</h3>
+                        <p class="text-gray-700 text-sm">Dirayakan 10 hari setelah Galungan. Menggunakan sarana Nasi Kuning sebagai rasa syukur kepada Dewa dan Leluhur.</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Slide 17: Penutup -->
+            <div id="slide17" class="slide flex-col items-center justify-center text-center h-full">
+                <div class="text-6xl mb-6">🙏</div>
+                <h2 class="text-3xl font-bold text-gray-800 mb-4">Terima Kasih!</h2>
+                <p class="text-lg text-gray-600 mb-8 max-w-md">Semoga pembelajaran interaktif ini bermanfaat untuk memahami Hari Suci Pawukon. Rahayu.</p>
+                <div class="bg-white p-4 rounded-xl shadow-sm border mb-8">
+                    <p class="text-sm font-bold text-gray-500">Dibuat oleh:</p>
+                    <p class="text-xl font-bold text-prada">I Made Edy Bangkit Saputra</p>
+                </div>
+                <button onclick="goToSlide(1)" class="bg-gray-800 text-white px-8 py-3 rounded-full font-bold hover:bg-gray-900 transition">Kembali ke Menu</button>
+            </div>
+
+        </main>
+
+        <!-- Footer / Navigation Controls -->
+        <footer id="navFooter" class="hidden flex justify-between items-center px-4 py-3 sm:px-6 sm:py-4 bg-white border-t z-50">
+            <button onclick="prevSlide()" id="btnPrev" class="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg font-bold hover:bg-gray-300 transition">Kembali</button>
+            
+            <!-- Progress Dots -->
+            <div class="flex gap-1 overflow-hidden max-w-[150px] sm:max-w-none">
+                <script>
+                    for(let i=2; i<=17; i++){
+                        document.write(`<div id="dot${i}" class="w-2 h-2 rounded-full bg-gray-300"></div>`);
+                    }
+                </script>
+            </div>
+
+            <button onclick="nextSlide()" id="btnNext" class="px-4 py-2 bg-prada text-white rounded-lg font-bold hover:opacity-90 transition shadow">Lanjut</button>
+        </footer>
+    </div>
+
+    <script>
+        /* --- GLOBAL NAVIGATION LOGIC --- */
+        let currentSlide = 0;
+        const totalSlides = 17; // 0 to 17
+
+        function updateUI() {
+            // Hide all slides
+            document.querySelectorAll('.slide').forEach(el => el.classList.remove('active'));
+            // Show current
+            const activeSlide = document.getElementById('slide' + currentSlide);
+            if(activeSlide) {
+                activeSlide.classList.add('active');
+                // Scroll container to top
+                activeSlide.parentElement.scrollTop = 0;
+            }
+
+            // Header & Footer visibility
+            const header = document.getElementById('topHeader');
+            const footer = document.getElementById('navFooter');
+            
+            if (currentSlide === 0) {
+                header.classList.add('hidden');
+                footer.classList.add('hidden');
+            } else if (currentSlide === 1) {
+                header.classList.add('hidden');
+                footer.classList.remove('hidden');
+                footer.classList.add('flex');
+            } else {
+                header.classList.remove('hidden');
+                header.classList.add('flex');
+                footer.classList.remove('hidden');
+                footer.classList.add('flex');
+            }
+
+            // Buttons state
+            document.getElementById('btnPrev').style.visibility = (currentSlide <= 1) ? 'hidden' : 'visible';
+            document.getElementById('btnNext').style.visibility = (currentSlide === totalSlides) ? 'hidden' : 'visible';
+
+            // Indicator
+            document.getElementById('pageIndicator').innerText = "Hal: " + currentSlide;
+
+            // Dots
+            for(let i=2; i<=totalSlides; i++){
+                const dot = document.getElementById('dot'+i);
+                if(dot) {
+                    dot.className = (i === currentSlide) ? 'w-2 h-2 rounded-full bg-yellow-500 scale-125' : 'w-2 h-2 rounded-full bg-gray-300';
+                }
+            }
+        }
+
+        function nextSlide() { if(currentSlide < totalSlides) { currentSlide++; updateUI(); } }
+        function prevSlide() { if(currentSlide > 0) { currentSlide--; updateUI(); } }
+        function goToSlide(index) { currentSlide = index; updateUI(); }
+
+        /* --- FULLSCREEN --- */
+        function toggleFullscreen() {
+            if (!document.fullscreenElement) {
+                document.documentElement.requestFullscreen().catch(err => {
+                    showToast("Error", "Gagal membuka layar penuh", "error");
+                });
+            } else {
+                if (document.exitFullscreen) { document.exitFullscreen(); }
+            }
+        }
+
+        /* --- CUSTOM TOAST (Pengganti Alert) --- */
+        function showToast(title, message, type='success') {
+            const modal = document.getElementById('toastModal');
+            document.getElementById('toastTitle').innerText = title;
+            document.getElementById('toastMessage').innerText = message;
+            
+            const icon = document.getElementById('toastIcon');
+            if(type === 'success') {
+                icon.innerText = "✅";
+                document.getElementById('toastTitle').className = "text-2xl font-bold mb-2 text-green-600";
+            } else if(type === 'error') {
+                icon.innerText = "❌";
+                document.getElementById('toastTitle').className = "text-2xl font-bold mb-2 text-red-600";
+            } else {
+                icon.innerText = "💡";
+                document.getElementById('toastTitle').className = "text-2xl font-bold mb-2 text-blue-600";
+            }
+            
+            modal.classList.add('show');
+        }
+        function closeToast() {
+            document.getElementById('toastModal').classList.remove('show');
+        }
+
+        /* --- SIMULASI PAWUKON --- */
+        const wukuData = {
+            "Sinta": { title: "Hari Raya Pagerwesi", desc: "Dirayakan pada Buda Kliwon Sinta. Maknanya membentengi diri dengan pengetahuan suci." },
+            "Landep": { title: "Tumpek Landep", desc: "Dirayakan pada Saniscara Kliwon Landep. Pemujaan atas ketajaman pikiran (jnana)." },
+            "Ukir": { title: "Tidak Ada Hari Raya Besar", desc: "Di wuku ini biasanya masyarakat beraktivitas seperti biasa dengan sembahyang harian." },
+            "Dungulan": { title: "Hari Raya Galungan", desc: "Dirayakan pada Buda Kliwon Dungulan. Merayakan kemenangan kebaikan atas keburukan." },
+            "Kuningan": { title: "Hari Raya Kuningan", desc: "Dirayakan pada Saniscara Kliwon Kuningan. Memohon berkah dari Dewa dan leluhur." },
+            "Watugunung": { title: "Hari Raya Saraswati", desc: "Dirayakan pada Saniscara Umanis Watugunung. Memuja dewi ilmu pengetahuan." }
+        };
+
+        function updateSimulasi() {
+            const val = document.getElementById('wukuSelect').value;
+            const resArea = document.getElementById('simulasiResult');
+            const emptyArea = document.getElementById('simEmpty');
+            
+            if(val && wukuData[val]) {
+                emptyArea.style.display = 'none';
+                resArea.style.display = 'flex';
+                // Trigger animation reflow
+                resArea.classList.remove('fade-in');
+                void resArea.offsetWidth;
+                resArea.classList.add('fade-in');
+                
+                document.getElementById('simTitle').innerText = wukuData[val].title;
+                document.getElementById('simDesc').innerText = wukuData[val].desc;
+                
+                if(val === 'Watugunung') document.getElementById('simIcon').innerText = "📚";
+                else if(val === 'Dungulan') document.getElementById('simIcon').innerText = "🎋";
+                else if(val === 'Kuningan') document.getElementById('simIcon').innerText = "🍚";
+                else if(val === 'Sinta') document.getElementById('simIcon').innerText = "🛡️";
+                else document.getElementById('simIcon').innerText = "🙏";
+            }
+        }
+
+        /* --- GAME LOGIC: Custom Select-to-Drop (Touch Friendly) --- */
+        // Game 1 Variables
+        let g1ActiveItem = null;
+        function selectMatchItem(el) {
+            document.querySelectorAll('#matchSources .draggable-item').forEach(i => i.classList.remove('selected'));
+            el.classList.add('selected');
+            g1ActiveItem = el;
+        }
+        function dropMatchItem(zone) {
+            if(!g1ActiveItem) return;
+            // if zone already has item, put it back
+            if(zone.children.length > 0) {
+                document.getElementById('matchSources').appendChild(zone.children[0]);
+            }
+            zone.appendChild(g1ActiveItem);
+            zone.classList.add('active-zone');
+            g1ActiveItem.classList.remove('selected');
+            g1ActiveItem = null;
+        }
+        function checkGame1() {
+            let score = 0;
+            const zones = document.querySelectorAll('#matchTargets .drop-zone');
+            zones.forEach(z => {
+                if(z.children.length > 0) {
+                    if(z.children[0].dataset.id === z.dataset.answer) score++;
+                }
+            });
+            if(score === 5) showToast("Hebat!", "Semua pasangan benar! (Skor: 5/5)", "success");
+            else showToast("Coba Lagi", `Kamu baru benar ${score} dari 5. Periksa kembali ya!`, "error");
+        }
+
+        // Game 2 Variables
+        let g2ActiveItem = null;
+        function selectWordItem(el) {
+            document.querySelectorAll('#wordSources .draggable-item').forEach(i => i.classList.remove('selected'));
+            el.classList.add('selected');
+            g2ActiveItem = el;
+        }
+        function dropWordItem(zone) {
+            if(!g2ActiveItem) return;
+            if(zone.children.length > 0) {
+                document.getElementById('wordSources').appendChild(zone.children[0]);
+            }
+            zone.appendChild(g2ActiveItem);
+            g2ActiveItem.classList.remove('selected');
+            g2ActiveItem = null;
+            // style adjustments for inline display
+            zone.classList.remove('border-indigo-300');
+            zone.classList.add('border-transparent');
+        }
+        function checkGame2() {
+            let score = 0;
+            const zones = document.querySelectorAll('#slide12 .drop-zone');
+            zones.forEach(z => {
+                if(z.children.length > 0) {
+                    if(z.children[0].dataset.word === z.dataset.answer) score++;
+                }
+            });
+            if(score === 5) showToast("Sempurna!", "Paragraf telah dilengkapi dengan benar!", "success");
+            else showToast("Kurang Tepat", `Kamu benar ${score} dari 5 kata. Yuk, coba lagi!`, "error");
+        }
+
+        // Game 3 Fill Words
+        function checkGame3() {
+            const ans = ["saraswati", "pengetahuan", "saniscara", "watugunung", "lontar"];
+            let score = 0;
+            for(let i=1; i<=5; i++) {
+                const el = document.getElementById('g3_'+i);
+                if(el.value.trim().toLowerCase() === ans[i-1]) {
+                    score++;
+                    el.classList.remove('text-orange-700', 'border-orange-400');
+                    el.classList.add('text-green-600', 'border-green-500');
+                } else {
+                    el.classList.remove('text-green-600', 'border-green-500');
+                    el.classList.add('text-red-500', 'border-red-500');
+                }
+            }
+            if(score === 5) showToast("Luar Biasa!", "Semua isian benar!", "success");
+            else showToast("Ayo Coba Lagi", `Benar ${score} dari 5. Periksa yang berwarna merah.`, "error");
+        }
+
+        // Game 4 Tebak Gambar
+        const tgData = [
+            { svg: '<svg class="w-32 h-32" viewBox="0 0 100 100" fill="none" stroke="currentColor" stroke-width="4"><path d="M50 90 L50 20 Q50 10 35 15 Q20 20 20 40"/><path d="M50 30 L60 40 M50 40 L60 50 M50 50 L60 60"/><circle cx="20" cy="40" r="3" fill="currentColor"/></svg>', ans: "Galungan", opts: ["Saraswati", "Galungan", "Pagerwesi", "Siwaratri"] },
+            { svg: '<svg class="w-32 h-32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"></path><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"></path></svg>', ans: "Saraswati", opts: ["Kuningan", "Nyepi", "Saraswati", "Galungan"] },
+            { svg: '<svg class="w-32 h-32" viewBox="0 0 100 100" fill="currentColor"><path d="M50 20 L20 80 L80 80 Z"/><rect x="25" y="80" width="50" height="10" fill="#8B4513"/></svg>', ans: "Kuningan", opts: ["Pagerwesi", "Kuningan", "Nyepi", "Saraswati"] },
+            { svg: '<svg class="w-32 h-32" viewBox="0 0 24 24" fill="currentColor"><path d="M12 1L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4z"/></svg>', ans: "Pagerwesi", opts: ["Galungan", "Kuningan", "Pagerwesi", "Tumpek Landep"] },
+            { svg: '<svg class="w-32 h-32" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2L2 12h3v8h14v-8h3L12 2zm0 2.8L17.2 10H6.8L12 4.8z"/></svg>', ans: "Tempat Suci/Pura", opts: ["Tempat Suci/Pura", "Sekolah", "Rumah", "Pasar"] }
+        ];
+        let tgCurrent = 0;
+        let tgScore = 0;
+
+        function loadTG() {
+            if(tgCurrent >= tgData.length) {
+                showToast("Selesai!", `Game Tebak Gambar selesai! Skor: ${tgScore}/${tgData.length}`, "success");
+                tgCurrent = 0; tgScore = 0; // reset for next play
+                return;
+            }
+            const q = tgData[tgCurrent];
+            document.getElementById('tgProgress').innerText = `${tgCurrent + 1} / 5`;
+            document.getElementById('tgImageContainer').innerHTML = q.svg;
+            
+            const optsContainer = document.getElementById('tgOptions');
+            optsContainer.innerHTML = '';
+            
+            // shuffle options
+            let opts = [...q.opts].sort(() => Math.random() - 0.5);
+            
+            opts.forEach(opt => {
+                const btn = document.createElement('button');
+                btn.className = "bg-teal-500 hover:bg-teal-600 text-white font-bold py-3 px-4 rounded-xl shadow transition";
+                btn.innerText = opt;
+                btn.onclick = () => checkTG(opt, q.ans);
+                optsContainer.appendChild(btn);
+            });
+        }
+        function checkTG(selected, correct) {
+            if(selected === correct) {
+                tgScore++;
+                showToast("Benar!", "Tebakanmu tepat!", "success");
+            } else {
+                showToast("Salah", `Jawaban yang benar adalah ${correct}`, "error");
+            }
+            tgCurrent++;
+            setTimeout(loadTG, 1500); // load next after toast
+        }
+
+        /* --- KUIS INTERAKTIF (10 Soal) --- */
+        const quizData = [
+            // PG
+            { type: "PG", q: "Berapa hari jumlah satu siklus Pawukon dalam kalender Bali?", opts: ["30 hari", "210 hari", "365 hari", "35 hari"], ans: 1 },
+            { type: "PG", q: "Hari raya yang dirayakan setiap Saniscara Umanis Watugunung adalah...", opts: ["Galungan", "Kuningan", "Saraswati", "Pagerwesi"], ans: 2 },
+            { type: "PG", q: "Sarana upacara yang khas pada hari raya Galungan dan dipasang di depan pintu masuk rumah adalah...", opts: ["Penjor", "Ogoh-ogoh", "Ketupat", "Tumpeng Kuning"], ans: 0 },
+            { type: "PG", q: "Makna dari hari raya Pagerwesi adalah...", opts: ["Turunnya dewa-dewi", "Memagari diri dengan ilmu dan iman yang kuat", "Menyucikan senjata pusaka", "Hari kasih sayang"], ans: 1 },
+            { type: "PG", q: "Kuningan dirayakan berapa hari setelah Galungan?", opts: ["3 hari", "5 hari", "10 hari", "15 hari"], ans: 2 },
+            // Menjodohkan (DnD click style) -> Simplified to Select for robustness in quiz format
+            { type: "PG", q: "Wuku ke-11 dimana dirayakannya hari Galungan bernama wuku...", opts: ["Sinta", "Landep", "Dungulan", "Watugunung"], ans: 2 },
+            { type: "PG", q: "Nasi kuning/Tumpeng merupakan ciri khas dari hari raya...", opts: ["Saraswati", "Nyepi", "Galungan", "Kuningan"], ans: 3 },
+            { type: "PG", q: "Buda Kliwon Sinta adalah peringatan hari raya...", opts: ["Pagerwesi", "Galungan", "Saraswati", "Banyu Pinaruh"], ans: 0 },
+            // Benar Salah
+            { type: "TF", q: "Benar atau Salah: Siklus Pawukon terdiri dari 30 Wuku.", ans: true },
+            { type: "TF", q: "Benar atau Salah: Pada hari Saraswati, kita mensyukuri turunnya ilmu pengetahuan.", ans: true }
+        ];
+        
+        let qIndex = 0;
+        let qScore = 0;
+
+        function loadQuiz() {
+            if(qIndex >= quizData.length) {
+                // Tampilkan Hasil
+                document.getElementById('quizContainer').classList.add('hidden');
+                document.getElementById('quizResult').classList.remove('hidden');
+                const final = Math.round((qScore / quizData.length) * 100);
+                document.getElementById('finalScore').innerText = final;
+                
+                const msg = document.getElementById('motivasiMsg');
+                if(final === 100) msg.innerText = "Luar Biasa! Sempurna!";
+                else if(final >= 80) msg.innerText = "Bagus Sekali! Pemahamanmu sangat baik.";
+                else if(final >= 60) msg.innerText = "Cukup Bagus, mari belajar lebih giat lagi.";
+                else msg.innerText = "Jangan menyerah, baca kembali materinya ya!";
+                return;
+            }
+
+            const q = quizData[qIndex];
+            document.getElementById('quizProgress').innerText = `Soal ${qIndex+1}/10`;
+            document.getElementById('qText').innerText = q.q;
+            
+            const optsContainer = document.getElementById('qOptions');
+            optsContainer.innerHTML = '';
+            document.getElementById('qFeedback').className = 'hidden mt-6 p-4 rounded-xl font-bold text-center';
+            document.getElementById('qNextBtn').classList.add('hidden');
+
+            if(q.type === "PG") {
+                q.opts.forEach((opt, idx) => {
+                    const btn = document.createElement('button');
+                    btn.className = "text-left bg-gray-50 hover:bg-yellow-50 border-2 border-gray-200 hover:border-yellow-400 p-4 rounded-xl font-medium text-gray-700 transition";
+                    btn.innerText = opt;
+                    btn.onclick = () => handleAnswer(idx, q.ans, btn);
+                    optsContainer.appendChild(btn);
+                });
+            } else if (q.type === "TF") {
+                const bBtn = document.createElement('button');
+                bBtn.className = "bg-green-50 hover:bg-green-100 border-2 border-green-200 p-4 rounded-xl font-bold text-green-700 transition";
+                bBtn.innerText = "Benar";
+                bBtn.onclick = () => handleAnswer(true, q.ans, bBtn);
+                
+                const sBtn = document.createElement('button');
+                sBtn.className = "bg-red-50 hover:bg-red-100 border-2 border-red-200 p-4 rounded-xl font-bold text-red-700 transition";
+                sBtn.innerText = "Salah";
+                sBtn.onclick = () => handleAnswer(false, q.ans, sBtn);
+                
+                optsContainer.appendChild(bBtn);
+                optsContainer.appendChild(sBtn);
+            }
+        }
+
+        function handleAnswer(selected, correct, btn) {
+            // Disable all buttons
+            const btns = document.getElementById('qOptions').querySelectorAll('button');
+            btns.forEach(b => b.disabled = true);
+            
+            const fb = document.getElementById('qFeedback');
+            fb.classList.remove('hidden');
+
+            if(selected === correct) {
+                qScore++;
+                btn.classList.add('bg-green-100', 'border-green-500', 'text-green-800');
+                fb.classList.add('bg-green-100', 'text-green-700');
+                fb.innerText = "✅ Jawaban Benar!";
+            } else {
+                btn.classList.add('bg-red-100', 'border-red-500', 'text-red-800');
+                fb.classList.add('bg-red-100', 'text-red-700');
+                fb.innerText = "❌ Jawaban Salah!";
+                
+                // highlight correct for PG
+                if(typeof correct === 'number') {
+                    btns[correct].classList.add('bg-green-100', 'border-green-500');
+                }
+            }
+            
+            document.getElementById('qNextBtn').classList.remove('hidden');
+        }
+
+        function nextQuiz() {
+            qIndex++;
+            loadQuiz();
+        }
+
+        function resetQuiz() {
+            qIndex = 0;
+            qScore = 0;
+            document.getElementById('quizResult').classList.add('hidden');
+            document.getElementById('quizContainer').classList.remove('hidden');
+            loadQuiz();
+        }
+
+        // Initialize Game 4 and Quiz on load
+        window.onload = function() {
+            loadTG();
+            loadQuiz();
+        };
+
+    </script>
+</body>
+</html>
